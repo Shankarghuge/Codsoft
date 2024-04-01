@@ -1,0 +1,91 @@
+#include <opencv2/opencv.hpp>
+#include <QApplication>
+#include <QMainWindow>
+#include <QFileDialog>
+#include <QHBoxLayout>
+#include <QVBoxLayout>
+#include <QLabel>
+#include <QPushButton>
+#include <QSlider>
+
+class ImageProcessor : public QMainWindow {
+    Q_OBJECT
+
+public:
+    ImageProcessor(QWidget *parent = nullptr);
+    ~ImageProcessor();
+
+private slots:
+    void loadImage();
+    void applyGrayscale();
+    void applyBlur(int blurSize);
+    void saveImage();
+
+private:
+    void displayImage(const cv::Mat &image);
+
+    cv::Mat originalImage;
+    cv::Mat displayedImage;
+    QLabel *imageLabel;
+};
+
+ImageProcessor::ImageProcessor(QWidget *parent)
+    : QMainWindow(parent) {
+    QWidget *centralWidget = new QWidget(this);
+    setCentralWidget(centralWidget);
+
+    QVBoxLayout *mainLayout = new QVBoxLayout(centralWidget);
+
+    imageLabel = new QLabel(this);
+    mainLayout->addWidget(imageLabel);
+
+    QPushButton *loadButton = new QPushButton("Load Image", this);
+    connect(loadButton, &QPushButton::clicked, this, &ImageProcessor::loadImage);
+    mainLayout->addWidget(loadButton);
+
+    QPushButton *grayscaleButton = new QPushButton("Grayscale", this);
+    connect(grayscaleButton, &QPushButton::clicked, this, &ImageProcessor::applyGrayscale);
+    mainLayout->addWidget(grayscaleButton);
+
+    QPushButton *saveButton = new QPushButton("Save Image", this);
+    connect(saveButton, &QPushButton::clicked, this, &ImageProcessor::saveImage);
+    mainLayout->addWidget(saveButton);
+}
+
+ImageProcessor::~ImageProcessor() {}
+
+void ImageProcessor::loadImage() {
+    QString fileName = QFileDialog::getOpenFileName(this, tr("Open Image"), "", tr("Image Files (*.png *.jpg *.jpeg *.bmp *.gif)"));
+    if (!fileName.isEmpty()) {
+        originalImage = cv::imread(fileName.toStdString());
+        displayedImage = originalImage.clone();
+        displayImage(displayedImage);
+    }
+}
+
+void ImageProcessor::displayImage(const cv::Mat &image) {
+    QImage qImage(image.data, image.cols, image.rows, image.step, QImage::Format_RGB888);
+    QPixmap pixmap = QPixmap::fromImage(qImage.rgbSwapped());
+    imageLabel->setPixmap(pixmap);
+}
+
+void ImageProcessor::applyGrayscale() {
+    cv::cvtColor(originalImage, displayedImage, cv::COLOR_BGR2GRAY);
+    displayImage(displayedImage);
+}
+
+void ImageProcessor::saveImage() {
+    QString fileName = QFileDialog::getSaveFileName(this, tr("Save Image"), "", tr("Image Files (*.png *.jpg *.jpeg *.bmp *.gif)"));
+    if (!fileName.isEmpty()) {
+        cv::imwrite(fileName.toStdString(), displayedImage);
+    }
+}
+
+int main(int argc, char *argv[]) {
+    QApplication app(argc, argv);
+    ImageProcessor window;
+    window.show();
+    return app.exec();
+}
+
+#include "main.moc"
