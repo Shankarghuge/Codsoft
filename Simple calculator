@@ -1,0 +1,55 @@
+#include <iostream>
+
+int main() 
+{
+    char operation;
+    double num1, num2;
+
+    std::cout << "Welcome to the Basic Calculator!\n";
+
+    while (true) 
+{
+        
+        std::cout << "\nChoose an operation (+, -, *, /) or enter 'exit' to quit: ";
+        std::cin >> operation;
+
+        
+        if (operation == 'e' || operation == 'E')
+{
+            std::cout << "Exiting the calculator." << std::endl;
+            break;
+        }
+
+        
+        std::cout << "Enter the first number: ";
+        std::cin >> num1;
+
+        std::cout << "Enter the second number: ";
+        std::cin >> num2;
+
+       
+        switch(operation)
+{
+            case '+':
+                std::cout << "Result: " << num1 + num2 << std::endl;
+                break;
+            case '-':
+                std::cout << "Result: " << num1 - num2 << std::endl;
+                break;
+            case '*':
+                std::cout << "Result: " << num1 * num2 << std::endl;
+                break;
+            case '/':
+                if (num2 != 0) {
+                    std::cout << "Result: " << num1 / num2 << std::endl;
+                } else {
+                    std::cout << "Error: Division by zero is undefined." << std::endl;
+                }
+                break;
+            default:
+                std::cout << "Error: Invalid operation." << std::endl;
+        }
+    }
+
+    return 0;
+}
